@@ -1,4 +1,5 @@
-use std::iter::repeat_with;
+use std::iter::{repeat_with, FromIterator};
+use std::ops::AddAssign;
 
 // Reference: https://en.wikipedia.org/wiki/Fenwick_tree
 pub struct FenwickTree<T> {
@@ -41,6 +42,23 @@ impl<T: for<'a> std::ops::AddAssign<&'a T> + Default> FenwickTree<T> {
         self.accum(r) - self.accum(l)
     }
 }
+impl<T: Clone + AddAssign<T>> From<Vec<T>> for FenwickTree<T> {
+    fn from(mut ary: Vec<T>) -> Self {
+        for i in 1..=ary.len() {
+            let j = i + (i & i.wrapping_neg());
+            if j <= ary.len() {
+                let add = ary[i - 1].clone();
+                ary[j - 1] += add;
+            }
+        }
+        Self { n: ary.len(), ary }
+    }
+}
+impl<T: Clone + AddAssign<T>> FromIterator<T> for FenwickTree<T> {
+    fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
+        iter.into_iter().collect::<Vec<_>>().into()
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -56,5 +74,16 @@ mod tests {
         assert_eq!(bit.sum(0, 5), 15);
         assert_eq!(bit.sum(0, 4), 10);
         assert_eq!(bit.sum(1, 3), 5);
+    }
+
+    #[test]
+    fn from_iter_works() {
+        let tree = FenwickTree::from_iter(vec![1, 2, 3, 4, 5].iter().map(|x| x * 2));
+        let internal = vec![2, 4, 6, 8, 10];
+        for j in 0..=internal.len() {
+            for i in 0..=j {
+                assert_eq!(tree.sum(i, j), internal[i..j].iter().sum::<i32>());
+            }
+        }
     }
 }
