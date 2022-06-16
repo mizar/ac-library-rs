@@ -1,35 +1,35 @@
+use std::iter::repeat_with;
+
 // Reference: https://en.wikipedia.org/wiki/Fenwick_tree
 pub struct FenwickTree<T> {
     n: usize,
     ary: Vec<T>,
-    e: T,
 }
 
-impl<T: Clone + std::ops::AddAssign<T>> FenwickTree<T> {
-    pub fn new(n: usize, e: T) -> Self {
+impl<T: for<'a> std::ops::AddAssign<&'a T> + Default> FenwickTree<T> {
+    pub fn new(n: usize) -> Self {
         FenwickTree {
             n,
-            ary: vec![e.clone(); n],
-            e,
+            ary: repeat_with(T::default).take(n).collect(),
         }
     }
     pub fn accum(&self, mut idx: usize) -> T {
-        let mut sum = self.e.clone();
+        let mut sum = T::default();
         while idx > 0 {
-            sum += self.ary[idx - 1].clone();
+            sum += &self.ary[idx - 1];
             idx &= idx - 1;
         }
         sum
     }
     /// performs data[idx] += val;
-    pub fn add<U: Clone>(&mut self, mut idx: usize, val: U)
+    pub fn add<U>(&mut self, mut idx: usize, val: U)
     where
-        T: std::ops::AddAssign<U>,
+        T: for<'a> std::ops::AddAssign<&'a U>,
     {
         let n = self.n;
         idx += 1;
         while idx <= n {
-            self.ary[idx - 1] += val.clone();
+            self.ary[idx - 1] += &val;
             idx += idx & idx.wrapping_neg();
         }
     }
@@ -48,7 +48,7 @@ mod tests {
 
     #[test]
     fn fenwick_tree_works() {
-        let mut bit = FenwickTree::new(5, 0i64);
+        let mut bit = FenwickTree::<i64>::new(5);
         // [1, 2, 3, 4, 5]
         for i in 0..5 {
             bit.add(i, i as i64 + 1);
