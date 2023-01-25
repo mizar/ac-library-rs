@@ -167,23 +167,37 @@ impl Dsu {
     ///
     /// - $O(n)$
     pub fn groups(&mut self) -> Vec<Vec<usize>> {
-        let mut leader_buf = vec![0; self.n];
-        let mut group_size = vec![0; self.n];
-        for i in 0..self.n {
-            leader_buf[i] = self.leader(i);
-            group_size[leader_buf[i]] += 1;
+        let leader_buf = (0..self.n).map(|i| self.leader(i)).collect::<Vec<_>>();
+        let mut group_size = vec![0usize; self.n];
+        for &leader in leader_buf.iter() {
+            group_size[leader] += 1;
         }
-        let mut result = vec![Vec::new(); self.n];
-        for i in 0..self.n {
-            result[i].reserve(group_size[i]);
+        let mut packed_count = 0usize;
+        let mut packed = group_size
+            .iter()
+            .map(|&size| {
+                let val = packed_count;
+                packed_count += size;
+                (val, val)
+            })
+            .collect::<Vec<_>>();
+        let mut result = vec![0usize; self.n];
+        for (i, &leader) in leader_buf.iter().enumerate() {
+            if let Some(range) = packed.get_mut(leader) {
+                result[range.1] = i;
+                range.1 += 1;
+            }
         }
-        for i in 0..self.n {
-            result[leader_buf[i]].push(i);
-        }
-        result
-            .into_iter()
-            .filter(|x| !x.is_empty())
-            .collect::<Vec<Vec<usize>>>()
+        packed
+            .iter()
+            .filter_map(|&(i, j)| {
+                if i != j {
+                    Some(result[i..j].to_vec())
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<_>>()
     }
 }
 
