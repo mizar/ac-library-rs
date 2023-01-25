@@ -269,6 +269,127 @@ pub(crate) fn iinv_gcd(a: i64, b: u64) -> (u64, u64) {
     }
 }
 
+/// inv_mod by BinaryGcd (currently BinaryGcd only works mod is odd)
+pub(crate) trait InvBinGcd<U> {
+    fn new(m: U) -> Self;
+    fn modulus(&self) -> U;
+    fn inv_gcd(&self, a: U) -> (U, U);
+}
+enum BinGcdMode {
+    BinGcd2,
+    ModGcd,
+}
+pub(crate) struct BinGcdU32 {
+    m: u32,
+    im: u64,
+    bm: [u32; 64],
+    bp: [u32; 64],
+    mode: BinGcdMode,
+}
+pub(crate) struct BinGcdU64 {
+    m: u64,
+    mi: u64,
+    r: u64,
+    r2: u64,
+}
+impl InvBinGcd<u32> for BinGcdU32 {
+    #[allow(clippy::many_single_char_names)]
+    fn new(m: u32) -> Self {
+        let (mut bp, mut bm) = ([0; 64], [0; 64]);
+        let im = (-1i64 as u64 / m as u64).wrapping_add(1);
+        let mode = if (m & 1) != 0 {
+            let m2c = (m >> 1) + 1;
+            let mut vp = 1;
+            bp[0] = vp;
+            for e in bp[1..].iter_mut() {
+                vp = (vp >> 1) + if (vp & 1) != 0 { m2c } else { 0 };
+                *e = vp;
+            }
+            let mut vm = m - 1;
+            bm[0] = vm;
+            for e in bm[1..].iter_mut() {
+                vm = (vm >> 1) + if (vm & 1) != 0 { m2c } else { 0 };
+                *e = vm;
+            }
+            BinGcdMode::BinGcd2
+        } else {
+            BinGcdMode::ModGcd
+        };
+        Self {
+            m,
+            im,
+            bp,
+            bm,
+            mode,
+        }
+    }
+    fn modulus(&self) -> u32 {
+        self.m
+    }
+    #[allow(clippy::many_single_char_names)]
+    fn inv_gcd(&self, n: u32) -> (u32, u32) {
+        match self.mode {
+            BinGcdMode::BinGcd2 => {
+                let (m, im) = (self.m, self.im);
+                if n == 0 {
+                    return (m, 0);
+                }
+                let mut s = n.trailing_zeros();
+                let (mut x, mut y, mut a, mut b) = (1, 0, n >> s, self.m);
+                if a == 1 {
+                    return (a, mul_mod(x, self.bp[s as usize], m, im));
+                }
+                if a <= b {
+                    y += x * (b / a);
+                    b %= a;
+                    if b == 0 {
+                        return (a, mul_mod(x, self.bp[s as usize], m, im));
+                    }
+                    let t = b.trailing_zeros();
+                    x <<= t;
+                    b >>= t;
+                    s += t;
+                } else {
+                    x += y * (a / b);
+                    a %= b;
+                    if a == 0 {
+                        return (b, mul_mod(y, self.bm[s as usize], m, im));
+                    }
+                    let t = a.trailing_zeros();
+                    y <<= t;
+                    a >>= t;
+                    s += t;
+                }
+                loop {
+                    if b == 1 || a == b {
+                        return (b, mul_mod(y, self.bm[s as usize], m, im));
+                    }
+                    while a > b {
+                        a -= b;
+                        x += y;
+                        let t = a.trailing_zeros();
+                        y <<= t;
+                        a >>= t;
+                        s += t;
+                    }
+                    if a == 1 || b == a {
+                        return (a, mul_mod(x, self.bp[s as usize], m, im));
+                    }
+                    while b > a {
+                        b -= a;
+                        y += x;
+                        let t = b.trailing_zeros();
+                        x <<= t;
+                        b >>= t;
+                        s += t;
+                    }
+                }
+            }
+            BinGcdMode::ModGcd => inv_gcd(n, self.m),
+        }
+    }
+}
+
 /// Compile time (currently not) primitive root
 /// @param m must be prime
 /// @return primitive root (and minimum in now)
@@ -330,6 +451,7 @@ mod tests {
     #![allow(clippy::cognitive_complexity)]
     use crate::internal_math::{
         iinv_gcd, inv_gcd, is_prime, pow_mod, pow_mod_u64, primitive_root, safe_mod, Barrett,
+        BinGcdU32, InvBinGcd,
     };
     use std::collections::HashSet;
 
@@ -565,6 +687,37 @@ mod tests {
             assert_eq!(g, g_);
             let b_ = b as i128;
             assert_eq!(((x as i128 * a as i128) % b_ + b_) % b_, g as i128 % b_);
+        }
+    }
+
+    #[test]
+    fn test_inv_bingcd() {
+        let bingcd_998244353 = BinGcdU32::new(998244353);
+        assert_eq!(bingcd_998244353.inv_gcd(100), (1, 828542813));
+        assert_eq!(bingcd_998244353.inv_gcd(u32::max_value()), (1, 588505387));
+        for i in 1..1000000 {
+            let res = bingcd_998244353.inv_gcd(i);
+            assert_eq!(res.0, 1);
+            assert_eq!(res.1 as u64 * i as u64 % 998244353, 1);
+        }
+    }
+
+    #[cfg(target_arch = "x86_64")]
+    #[test]
+    fn test_inv_bingcd_rand() {
+        use crate::internal_math::x86_rdrand;
+        let bingcd_998244353 = BinGcdU32::new(998244353);
+        assert_eq!(bingcd_998244353.inv_gcd(100), (1, 828542813));
+        for _ in 0..1000000 {
+            let n = x86_rdrand(998244352) + 1 + x86_rdrand(6) * 998244353;
+            let n = if n > u32::max_value() as u64 {
+                (n - 998244353) as u32
+            } else {
+                n as u32
+            };
+            let res = bingcd_998244353.inv_gcd(n);
+            assert_eq!(res.0, 1);
+            assert_eq!(res.1 as u64 * n as u64 % 998244353, 1);
         }
     }
 
