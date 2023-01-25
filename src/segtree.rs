@@ -3,7 +3,7 @@ use crate::internal_type_traits::{BoundedAbove, BoundedBelow, One, Zero};
 use std::cmp::{max, min};
 use std::convert::Infallible;
 use std::marker::PhantomData;
-use std::ops::{Add, Mul};
+use std::ops::{Add, BitAnd, BitOr, BitXor, Mul, Not};
 
 // TODO Should I split monoid-related traits to another module?
 pub trait Monoid {
@@ -65,6 +65,48 @@ where
     }
     fn binary_operation(a: &Self::S, b: &Self::S) -> Self::S {
         *a * *b
+    }
+}
+
+pub struct BitOrOper<S>(Infallible, PhantomData<fn() -> S>);
+impl<S> Monoid for BitOrOper<S>
+where
+    S: Copy + BitOr<Output = S> + Default,
+{
+    type S = S;
+    fn identity() -> Self::S {
+        S::default()
+    }
+    fn binary_operation(a: &Self::S, b: &Self::S) -> Self::S {
+        *a | *b
+    }
+}
+
+pub struct BitAndOper<S>(Infallible, PhantomData<fn() -> S>);
+impl<S> Monoid for BitAndOper<S>
+where
+    S: Copy + BitAnd<Output = S> + Not<Output = S> + Default,
+{
+    type S = S;
+    fn identity() -> Self::S {
+        !S::default()
+    }
+    fn binary_operation(a: &Self::S, b: &Self::S) -> Self::S {
+        *a & *b
+    }
+}
+
+pub struct BitXorOper<S>(Infallible, PhantomData<fn() -> S>);
+impl<S> Monoid for BitXorOper<S>
+where
+    S: Copy + BitXor<Output = S> + Default,
+{
+    type S = S;
+    fn identity() -> Self::S {
+        S::default()
+    }
+    fn binary_operation(a: &Self::S, b: &Self::S) -> Self::S {
+        *a ^ *b
     }
 }
 
