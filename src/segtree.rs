@@ -170,6 +170,10 @@ impl<M: Monoid> Segtree<M> {
         self.d[p + self.size].clone()
     }
 
+    pub fn get_slice(&self) -> &[M::S] {
+        &self.d[self.size..(self.size + self.n)]
+    }
+
     pub fn prod(&self, mut l: usize, mut r: usize) -> M::S {
         assert!(l <= r && r <= self.n);
         let mut sml = M::identity();
