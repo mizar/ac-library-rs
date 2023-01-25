@@ -8,7 +8,7 @@ use ac_library_rs::math;
 #[fastout]
 fn main() {
     input! {
-        nmabs: [(i64, i64, i64, i64)],
+        nmabs: [(u64, u64, u64, u64)],
     }
 
     for (n, m, a, b) in nmabs {

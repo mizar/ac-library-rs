@@ -51,7 +51,7 @@
 use crate::internal_math;
 use std::{
     cell::RefCell,
-    convert::{Infallible, TryInto as _},
+    convert::Infallible,
     fmt,
     hash::{Hash, Hasher},
     iter::{Product, Sum},
@@ -171,7 +171,7 @@ impl<M: Modulus> StaticModInt<M> {
                 panic!("attempt to divide by zero");
             }
             debug_assert!(
-                internal_math::is_prime(M::VALUE.try_into().unwrap()),
+                internal_math::is_prime(M::VALUE),
                 "{} is not a prime number",
                 M::VALUE,
             );
@@ -751,7 +751,7 @@ impl_rem_euclid_u32_for_large_unsigned!(usize);
 trait InternalImplementations: ModIntBase {
     #[inline]
     fn inv_for_non_prime_modulus(this: Self) -> Self {
-        let (gcd, x) = internal_math::inv_gcd(this.val().into(), Self::modulus().into());
+        let (gcd, x) = internal_math::inv_gcd(this.val(), Self::modulus());
         if gcd != 1 {
             panic!("the multiplicative inverse does not exist");
         }

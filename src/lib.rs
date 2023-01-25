@@ -21,7 +21,7 @@ pub use convolution::{convolution, convolution_i64};
 pub use dsu::Dsu;
 pub use fenwicktree::FenwickTree;
 pub use lazysegtree::{LazySegtree, MapMonoid};
-pub use math::{crt, floor_sum, inv_mod, pow_mod};
+pub use math::{crt, floor_sum, inv_mod, ipow_mod, sqrt_floor};
 pub use maxflow::{Edge, MfGraph};
 pub use mincostflow::MinCostFlowGraph;
 pub use modint::{

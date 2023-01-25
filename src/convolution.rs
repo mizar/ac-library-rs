@@ -102,9 +102,9 @@ pub fn convolution_i64(a: &[i64], b: &[i64]) -> Vec<i64> {
         return vec![];
     }
 
-    let (_, i1) = internal_math::inv_gcd(M2M3 as _, M1 as _);
-    let (_, i2) = internal_math::inv_gcd(M1M3 as _, M2 as _);
-    let (_, i3) = internal_math::inv_gcd(M1M2 as _, M3 as _);
+    let (_, i1) = internal_math::inv_gcd(M2M3, M1);
+    let (_, i2) = internal_math::inv_gcd(M1M3, M2);
+    let (_, i3) = internal_math::inv_gcd(M1M2, M3);
 
     let c1 = convolution_raw::<i64, M1>(a, b);
     let c2 = convolution_raw::<i64, M2>(a, b);
@@ -118,7 +118,11 @@ pub fn convolution_i64(a: &[i64], b: &[i64]) -> Vec<i64> {
 
             let mut x = [(c1, i1, M1, M2M3), (c2, i2, M2, M1M3), (c3, i3, M3, M1M2)]
                 .iter()
-                .map(|&(c, i, m1, m2)| c.wrapping_mul(i).rem_euclid(m1 as _).wrapping_mul(m2 as _))
+                .map(|&(c, i, m1, m2)| {
+                    c.wrapping_mul(i as _)
+                        .rem_euclid(m1 as _)
+                        .wrapping_mul(m2 as _)
+                })
                 .fold(0, i64::wrapping_add);
 
             // B = 2^63, -B <= x, r(real value) < B
@@ -138,7 +142,7 @@ pub fn convolution_i64(a: &[i64], b: &[i64]) -> Vec<i64> {
             //   ((1) mod MOD1) mod 5 = 2
             //   ((2) mod MOD1) mod 5 = 3
             //   ((3) mod MOD1) mod 5 = 4
-            let mut diff = c1 - internal_math::safe_mod(x, M1 as _);
+            let mut diff = c1 - x.rem_euclid(M1 as _);
             if diff < 0 {
                 diff += M1 as i64;
             }
@@ -201,7 +205,7 @@ fn butterfly_inv<M: Modulus>(a: &mut [StaticModInt<M>]) {
 }
 
 fn prepare<M: Modulus>() -> ButterflyCache<M> {
-    let g = StaticModInt::<M>::raw(internal_math::primitive_root(M::VALUE as i32) as u32);
+    let g = StaticModInt::<M>::raw(internal_math::primitive_root(M::VALUE));
     let mut es = [StaticModInt::<M>::raw(0); 30]; // es[i]^(2^(2+i)) == 1
     let mut ies = [StaticModInt::<M>::raw(0); 30];
     let cnt2 = (M::VALUE - 1).trailing_zeros() as usize;
