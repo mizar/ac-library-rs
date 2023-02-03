@@ -50,7 +50,34 @@ impl<F: MapMonoid> From<Vec<<F::M as Monoid>::S>> for LazySegtree<F> {
         ret
     }
 }
-
+impl<F: MapMonoid> std::iter::FromIterator<<F::M as Monoid>::S> for LazySegtree<F> {
+    fn from_iter<T: IntoIterator<Item = <F::M as Monoid>::S>>(iter: T) -> Self {
+        let iter = iter.into_iter();
+        let n = iter.size_hint().0;
+        let log = ceil_pow2(n as u32) as usize;
+        let size = 1 << log;
+        let mut d = Vec::with_capacity(size * 2);
+        let lz = vec![F::identity_map(); size];
+        d.extend(
+            std::iter::repeat_with(F::identity_element)
+                .take(size)
+                .chain(iter.take(n))
+                .chain(std::iter::repeat_with(F::identity_element).take(size - n)),
+        );
+        assert_eq!(d.len(), size * 2);
+        let mut ret = LazySegtree {
+            n,
+            size,
+            log,
+            d,
+            lz,
+        };
+        for i in (1..size).rev() {
+            ret.update(i);
+        }
+        ret
+    }
+}
 impl<F: MapMonoid> LazySegtree<F> {
     pub fn set(&mut self, mut p: usize, x: <F::M as Monoid>::S) {
         assert!(p < self.n);
