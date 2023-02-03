@@ -145,9 +145,10 @@ impl<M: Monoid> FromIterator<M::S> for Segtree<M> {
         d.extend(
             std::iter::repeat_with(M::identity)
                 .take(size)
-                .chain(iter)
+                .chain(iter.take(n))
                 .chain(std::iter::repeat_with(M::identity).take(size - n)),
         );
+        assert_eq!(d.len(), size * 2);
         let mut ret = Segtree { n, size, log, d };
         for i in (1..size).rev() {
             ret.update(i);
