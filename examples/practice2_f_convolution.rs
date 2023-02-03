@@ -1,15 +1,14 @@
-// Check Problem Statement via https://judge.yosupo.jp/problem/convolution_mod
+// Check Problem Statement via https://atcoder.jp/contests/practice2/tasks/practice2_f
 use ac_library_rs::{convolution, modint::ModInt998244353 as Mint};
 use std::io::prelude::*;
 
-#[allow(clippy::many_single_char_names)]
-fn main() {
+pub fn main() {
     let mut buf = String::new();
     std::io::stdin().read_to_string(&mut buf).unwrap();
     let mut input = buf.split_whitespace();
 
-    let n = input.next().unwrap().parse().unwrap();
-    let m = input.next().unwrap().parse().unwrap();
+    let n: usize = input.next().unwrap().parse().unwrap();
+    let m: usize = input.next().unwrap().parse().unwrap();
     let a: Vec<Mint> = input
         .by_ref()
         .take(n)

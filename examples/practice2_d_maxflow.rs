@@ -1,5 +1,6 @@
+// Check Problem Statement via https://atcoder.jp/contests/practice2/tasks/practice2_d
 use ac_library_rs::MfGraph;
-use std::io::Read;
+use std::io::prelude::*;
 
 #[allow(clippy::many_single_char_names)]
 #[allow(clippy::needless_range_loop)]

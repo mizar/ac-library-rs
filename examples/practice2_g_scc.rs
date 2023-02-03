@@ -1,6 +1,6 @@
 // Check Problem Statement via https://atcoder.jp/contests/practice2/tasks/practice2_g
 use ac_library_rs::SccGraph;
-use std::io::Read;
+use std::io::prelude::*;
 
 fn main() {
     let mut buf = String::new();

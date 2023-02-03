@@ -1,6 +1,6 @@
 // Check Problem Statement via https://atcoder.jp/contests/practice2/tasks/practice2_e
 use ac_library_rs::MinCostFlowGraph;
-use std::io::Read;
+use std::io::prelude::*;
 
 const MAX: i64 = 1_000_000_000;
 

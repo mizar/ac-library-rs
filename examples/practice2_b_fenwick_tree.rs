@@ -1,6 +1,6 @@
 // Check Problem Statement via https://atcoder.jp/contests/practice2/tasks/practice2_b
 use ac_library_rs::FenwickTree;
-use std::io::Read;
+use std::io::prelude::*;
 
 fn main() {
     let mut buf = String::new();
@@ -9,7 +9,7 @@ fn main() {
 
     let n = input.next().unwrap().parse().unwrap();
     let q = input.next().unwrap().parse().unwrap();
-    let mut tree = FenwickTree::<u64>::new(n, 0);
+    let mut tree = FenwickTree::<u64>::new(n);
     for i in 0..n {
         let a: u64 = input.next().unwrap().parse().unwrap();
         tree.add(i, a);

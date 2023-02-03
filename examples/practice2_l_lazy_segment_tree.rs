@@ -1,7 +1,8 @@
+// Check Problem Statement via https://atcoder.jp/contests/practice2/tasks/practice2_l
 #![allow(clippy::many_single_char_names)]
 use ac_library_rs::{LazySegtree, MapMonoid, Monoid};
-use std::io::Read;
-use std::iter;
+use std::io::prelude::*;
+use std::iter::FromIterator;
 
 struct M;
 impl Monoid for M {
@@ -35,6 +36,7 @@ impl MapMonoid for F {
     }
 }
 
+#[allow(clippy::many_single_char_names)]
 fn main() {
     let mut buf = String::new();
     std::io::stdin().read_to_string(&mut buf).unwrap();
@@ -42,21 +44,24 @@ fn main() {
 
     let n = input.next().unwrap().parse().unwrap();
     let q = input.next().unwrap().parse().unwrap();
-    let mut segtree: LazySegtree<F> = iter::once((0, 0, 0))
-        .chain(input.by_ref().take(n).map(|s| match s {
-            "0" => (1, 0, 0),
-            "1" => (0, 1, 0),
+    let mut segtree: LazySegtree<F> = LazySegtree::from_iter(std::iter::once((0, 0, 0)).chain(
+        input.by_ref().take(n).map(|s| match s.parse().unwrap() {
+            0 => (1, 0, 0),
+            1 => (0, 1, 0),
             _ => panic!(),
-        }))
-        .collect::<Vec<_>>()
-        .into();
+        }),
+    ));
     for _ in 0..q {
         let t = input.next().unwrap().parse().unwrap();
-        let l = input.next().unwrap().parse().unwrap();
+        let l: usize = input.next().unwrap().parse().unwrap();
         let r: usize = input.next().unwrap().parse().unwrap();
         match t {
-            1 => segtree.apply_range(l, r + 1, true),
-            2 => println!("{}", segtree.prod(l, r + 1).2),
+            1 => {
+                segtree.apply_range(l, r + 1, true);
+            }
+            2 => {
+                println!("{}", segtree.prod(l, r + 1).2);
+            }
             _ => {}
         }
     }

@@ -1,6 +1,6 @@
 // Check Problem Statement via https://atcoder.jp/contests/practice2/tasks/practice2_i
 use ac_library_rs::{lcp_array, suffix_array};
-use std::io::Read;
+use std::io::prelude::*;
 use std::iter;
 
 fn main() {

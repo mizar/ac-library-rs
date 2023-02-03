@@ -1,25 +1,30 @@
-#[macro_use]
-extern crate proconio as _;
-#[macro_use]
-extern crate proconio_derive as _;
-
+// Check Problem Statement via https://judge.yosupo.jp/problem/static_range_sum
 use ac_library_rs::fenwicktree::FenwickTree;
+use std::io::prelude::*;
 
+#[allow(clippy::many_single_char_names)]
 #[allow(clippy::needless_collect)]
-#[fastout]
 fn main() {
-    input! {
-        n: usize,
-        q: usize,
-        r#as: [u64; n],
-        lrs: [(usize, usize); q],
-    }
+    let mut buf = String::new();
+    std::io::stdin().read_to_string(&mut buf).unwrap();
+    let mut input = buf.split_whitespace();
 
-    let mut fenwick = FenwickTree::new(n, 0);
-    for (i, a) in r#as.into_iter().enumerate() {
+    let n = input.next().unwrap().parse().unwrap();
+    let q: usize = input.next().unwrap().parse().unwrap();
+
+    let mut fenwick = FenwickTree::<u64>::new(n);
+    for (i, a) in input
+        .by_ref()
+        .take(n)
+        .map(str::parse)
+        .map(Result::unwrap)
+        .enumerate()
+    {
         fenwick.add(i, a);
     }
-    for (l, r) in lrs {
+    for _ in 0..q {
+        let l = input.next().unwrap().parse().unwrap();
+        let r = input.next().unwrap().parse().unwrap();
         println!("{}", fenwick.sum(l, r));
     }
 }

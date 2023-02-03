@@ -1,6 +1,9 @@
+// Check Problem Statement via https://atcoder.jp/contests/practice2/tasks/practice2_j
 use ac_library_rs::{Max, Segtree};
-use std::io::Read;
+use std::io::prelude::*;
+use std::iter::FromIterator;
 
+#[allow(clippy::many_single_char_names)]
 fn main() {
     let mut buf = String::new();
     std::io::stdin().read_to_string(&mut buf).unwrap();
@@ -8,10 +11,9 @@ fn main() {
 
     let n: usize = input.next().unwrap().parse().unwrap();
     let q: usize = input.next().unwrap().parse().unwrap();
-    let mut segtree = Segtree::<Max<i32>>::new(n + 1);
-    for i in 1..=n {
-        segtree.set(i, input.next().unwrap().parse().unwrap());
-    }
+    let mut segtree = Segtree::<Max<i32>>::from_iter(
+        std::iter::once(0).chain((1..=n).map(|_| input.next().unwrap().parse().unwrap())),
+    );
     for _ in 0..q {
         match input.next().unwrap().parse().unwrap() {
             1 => {
@@ -27,7 +29,7 @@ fn main() {
             3 => {
                 let x = input.next().unwrap().parse().unwrap();
                 let v = input.next().unwrap().parse().unwrap();
-                println!("{}", segtree.max_right(x, |a| a < &v))
+                println!("{}", segtree.max_right(x, |a| a < &v));
             }
             _ => {}
         }

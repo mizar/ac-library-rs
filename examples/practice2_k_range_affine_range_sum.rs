@@ -1,5 +1,7 @@
+// Check Problem Statement via https://atcoder.jp/contests/practice2/tasks/practice2_k
 use ac_library_rs::{LazySegtree, MapMonoid, ModInt998244353, Monoid};
-use std::io::Read;
+use std::io::prelude::*;
+use std::iter::FromIterator;
 
 type Mint = ModInt998244353;
 struct Sum;
@@ -41,14 +43,10 @@ fn main() {
 
     let n = input.next().unwrap().parse().unwrap();
     let q = input.next().unwrap().parse().unwrap();
-    let mut segtree: LazySegtree<Affine> = input
-        .by_ref()
-        .take(n)
-        .map(|s| (s.parse().unwrap(), 1))
-        .collect::<Vec<_>>()
-        .into();
+    let mut segtree: LazySegtree<Affine> =
+        LazySegtree::from_iter(input.by_ref().take(n).map(|s| (s.parse().unwrap(), 1)));
     for _ in 0..q {
-        match input.next().unwrap().parse().unwrap() {
+        match input.next().unwrap().parse::<u32>().unwrap() {
             0 => {
                 let l = input.next().unwrap().parse().unwrap();
                 let r = input.next().unwrap().parse().unwrap();
