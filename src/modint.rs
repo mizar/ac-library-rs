@@ -858,7 +858,8 @@ macro_rules! impl_basic_traits {
             }
         }
 
-        #[allow(clippy::derive_hash_xor_eq)]
+        #[allow(clippy::derived_hash_with_manual_eq)] // Rust 1.68 or later
+        #[allow(clippy::derive_hash_xor_eq)] // before Rust 1.67
         impl<$generic_param: $generic_param_bound> Hash for $self {
             #[inline]
             fn hash<H: Hasher>(&self, state: &mut H) {
