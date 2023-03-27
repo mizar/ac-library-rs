@@ -164,6 +164,7 @@ jobs:
             static_range_sum
             sum_of_floor_of_linear
             unionfind
+            zalgorithm
           )
           for name in "${NAMES[@]}"; do
             oj d "https://judge.yosupo.jp/problem/$name" -ad "/tmp/$name"
