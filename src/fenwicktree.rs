@@ -1,3 +1,4 @@
+use crate::internal_type_traits::Zero;
 use std::iter::{repeat_with, FromIterator};
 use std::ops::AddAssign;
 
@@ -7,15 +8,15 @@ pub struct FenwickTree<T> {
     ary: Vec<T>,
 }
 
-impl<T: for<'a> std::ops::AddAssign<&'a T> + Default> FenwickTree<T> {
+impl<T: for<'a> std::ops::AddAssign<&'a T> + Zero> FenwickTree<T> {
     pub fn new(n: usize) -> Self {
         FenwickTree {
             n,
-            ary: repeat_with(T::default).take(n).collect(),
+            ary: repeat_with(T::zero).take(n).collect(),
         }
     }
     pub fn accum(&self, mut idx: usize) -> T {
-        let mut sum = T::default();
+        let mut sum = T::zero();
         while idx > 0 {
             sum += &self.ary[idx - 1];
             idx &= idx - 1;
