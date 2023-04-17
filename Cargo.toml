@@ -17,9 +17,14 @@ name = "ac_library"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[[bench]]
+name = "bench"
+harness = false
+
 [dependencies]
 
 [dev-dependencies]
+bencher = "0.1.5"
 proconio = "=0.3.6"
 proconio-derive = "0.2.1"
 rand = "0.7.3"
